@@ -1,134 +1,270 @@
-"use client"
+'use client'
 
-import React from "react"
+import { useState } from 'react'
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import NewAppointmentModal from '@/components/modals/NewAppointmentModal'
 
-import { useState } from "react"
-import DashboardLayout from "@/components/dashboard/DashboardLayout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+interface Appointment {
+  id: string
+  date: string
+  time: string
+  patientName: string
+  doctorName: string
+  reason: string
+  status: 'upcoming' | 'completed'
+}
 
-export default function AssistantAppointmentsPage() {
-  const [activeTab, setActiveTab] = useState("NEW")
-  const [appointments, setAppointments] = useState<any[]>([])
-  const [showModal, setShowModal] = useState(false)
-  const [formData, setFormData] = useState({
-    doctorName: "",
-    patientName: "",
-    date: "",
-    time: "",
-    reason: "",
-  })
+interface AppointmentFormData {
+  doctorName: string
+  patientName: string
+  date: string
+  time: string
+  reason: string
+}
 
-  const handleAddAppointment = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // API_ENDPOINT: POST /api/assistant/appointments/create
-    // Replace with actual API call
-    console.log("[v0] Creating appointment:", formData)
-    setShowModal(false)
-    setFormData({
-      doctorName: "",
-      patientName: "",
-      date: "",
-      time: "",
-      reason: "",
+export default function AssistantAppointments() {
+  const [activeTab, setActiveTab] = useState('new')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
+  const [doctorFilter, setDoctorFilter] = useState('')
+  const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
+
+  // New Appointments filters
+  const [newAptSearch, setNewAptSearch] = useState('')
+  const [newAptDate, setNewAptDate] = useState('')
+  const [newAptDoctor, setNewAptDoctor] = useState('')
+
+  // History Appointments filters
+  const [historyAptSearch, setHistoryAptSearch] = useState('')
+  const [historyAptDate, setHistoryAptDate] = useState('')
+  const [historyAptDoctor, setHistoryAptDoctor] = useState('')
+
+  // Mock appointments data
+  const [allAppointments] = useState<Appointment[]>([
+    {
+      id: '1',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Fatima Zahra Raiss',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '2',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Fouad Raissouni',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Follow up',
+      status: 'upcoming',
+    },
+    {
+      id: '3',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Krishtav Rajan',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Follow up',
+      status: 'upcoming',
+    },
+    {
+      id: '4',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Sumanth Tinson',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '5',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'EG Subramani',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '6',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Ranjan Maari',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '7',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Philliplie Gopal',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+  ])
+
+  const filteredAppointments = allAppointments
+    .filter((apt) => apt.status === (activeTab === 'new' ? 'upcoming' : 'completed'))
+    .filter((apt) => {
+      const currentSearch = activeTab === 'new' ? newAptSearch : historyAptSearch
+      return !currentSearch || apt.patientName.toLowerCase().includes(currentSearch.toLowerCase())
     })
+    .filter((apt) => {
+      const currentDate = activeTab === 'new' ? newAptDate : historyAptDate
+      return !currentDate || apt.date === currentDate
+    })
+    .filter((apt) => {
+      const currentDoctor = activeTab === 'new' ? newAptDoctor : historyAptDoctor
+      return !currentDoctor || apt.doctorName === currentDoctor
+    })
+
+  const handleCancelAppointment = (appointmentId: string) => {
+    console.log('[v0] Cancel appointment:', appointmentId)
+    // API call to cancel appointment would go here
+  }
+
+  const handleNewAppointmentConfirm = (data: AppointmentFormData) => {
+    console.log('[v0] New appointment created:', data)
+    // API call to create appointment would go here
+    setShowNewAppointmentModal(false)
   }
 
   return (
     <DashboardLayout userRole="assistant" pageTitle="Appointments">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Tabs */}
-        <div className="flex gap-8 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("NEW")}
-            className={`pb-4 px-2 font-medium transition-colors ${
-              activeTab === "NEW"
-                ? "text-[#0066FF] border-b-2 border-[#0066FF]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-[#0A1F44]">Appointments</h1>
+          </div>
+          <Button 
+            onClick={() => setShowNewAppointmentModal(true)}
+            className="bg-[#0066FF] text-white hover:bg-[#0052CC] flex items-center gap-2"
           >
-            NEW APPOINTMENTS
-          </button>
-          <button
-            onClick={() => setActiveTab("HISTORY")}
-            className={`pb-4 px-2 font-medium transition-colors ${
-              activeTab === "HISTORY"
-                ? "text-[#0066FF] border-b-2 border-[#0066FF]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            APPOINTMENTS HISTORY
-          </button>
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            New Appointment
+          </Button>
         </div>
 
-        {/* Actions Bar */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 max-w-xs">
-            <Input placeholder="Search" className="w-full" />
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex gap-8">
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`py-3 font-semibold text-sm transition ${
+                activeTab === 'new'
+                  ? 'text-[#0A1F44] border-b-2 border-[#0A1F44]'
+                  : 'text-gray-600 border-b-2 border-transparent'
+              }`}
+            >
+              NEW APPOINTMENTS
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`py-3 font-semibold text-sm transition ${
+                activeTab === 'history'
+                  ? 'text-[#0A1F44] border-b-2 border-[#0A1F44]'
+                  : 'text-gray-600 border-b-2 border-transparent'
+              }`}
+            >
+              APPOINTMENTS HISTORY
+            </button>
           </div>
-          <div className="flex gap-4">
+        </div>
+
+        {/* Filters */}
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            type="text"
+            placeholder="Search"
+            value={activeTab === 'new' ? newAptSearch : historyAptSearch}
+            onChange={(e) => activeTab === 'new' ? setNewAptSearch(e.target.value) : setHistoryAptSearch(e.target.value)}
+            className="max-w-sm"
+          />
+          <div className="flex gap-2 items-center">
             <div className="relative">
-              <Button variant="outline" className="bg-transparent">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3" />
-                </svg>
-                Filter by Date
-              </Button>
-            </div>
-            <div className="relative">
-              <Button variant="outline" className="bg-transparent">
-                Filter by Doctor Name
-              </Button>
+              <svg className="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <input
+                type="date"
+                value={activeTab === 'new' ? newAptDate : historyAptDate}
+                onChange={(e) => activeTab === 'new' ? setNewAptDate(e.target.value) : setHistoryAptDate(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
+                placeholder="Filter by Date"
+              />
             </div>
             <Button
-              onClick={() => setShowModal(true)}
-              className="bg-[#0066FF] text-white hover:bg-[#0052CC]"
+              variant="outline"
+              size="sm"
+              onClick={() => activeTab === 'new' ? setNewAptDate('') : setHistoryAptDate('')}
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             >
-              + New Appointment
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </Button>
+            <select
+              value={activeTab === 'new' ? newAptDoctor : historyAptDoctor}
+              onChange={(e) => activeTab === 'new' ? setNewAptDoctor(e.target.value) : setHistoryAptDoctor(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
+            >
+              <option value="">Filter by Doctor Name</option>
+              <option value="Dr. Fatima Marouon">Dr. Fatima Marouon</option>
+            </select>
           </div>
         </div>
 
-        {/* Table */}
-        <Card>
+        {/* Appointments Table */}
+        <Card className="border-0 shadow-sm">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Date</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Time</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Patient Name</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Doctor Name</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Reason</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">User Action</th>
+                  <tr className="border-b border-gray-200 bg-white">
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Date</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Time</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Patient Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Doctor Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Reason</th>
+                    <th className="text-center py-4 px-6 font-semibold text-gray-800 text-sm">User Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {appointments.length === 0 ? (
+                  {filteredAppointments.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-gray-500">
-                        No appointments to display. Create a new appointment to get started.
+                      <td colSpan={6} className="text-center py-12 text-gray-500">
+                        No appointments found.
                       </td>
                     </tr>
                   ) : (
-                    appointments.map((appointment, index) => (
-                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                        <td className="py-4 px-6 text-sm text-gray-700">{appointment.date}</td>
-                        <td className="py-4 px-6 text-sm text-gray-700">{appointment.time}</td>
-                        <td className="py-4 px-6 text-sm text-gray-700">{appointment.patientName}</td>
-                        <td className="py-4 px-6 text-sm text-gray-700">{appointment.doctorName}</td>
-                        <td className="py-4 px-6 text-sm text-gray-700">{appointment.reason}</td>
-                        <td className="py-4 px-6">
-                          <button className="text-red-500 hover:bg-red-50 p-2 rounded transition">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
+                    filteredAppointments.map((appointment) => (
+                      <tr key={appointment.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td className="py-4 px-6 font-medium text-gray-900">{appointment.date}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.time}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.patientName}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.doctorName}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.reason}</td>
+                        <td className="py-4 px-6 text-center">
+                          <button
+                            onClick={() => handleCancelAppointment(appointment.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition inline-flex items-center justify-center"
+                            title="Cancel appointment"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>
                           </button>
                         </td>
@@ -142,132 +278,39 @@ export default function AssistantAppointmentsPage() {
         </Card>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">Previous</p>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map((page) => (
-              <button
-                key={page}
-                className={`w-10 h-10 rounded-lg font-medium transition ${
-                  page === 1
-                    ? "bg-[#0066FF] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+        {filteredAppointments.length > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Showing results</span>
+            <div className="flex gap-2">
+              <Button variant="outline" disabled className="text-gray-400">
+                Previous
+              </Button>
+              <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] w-10 h-10 p-0">
+                1
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                2
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                3
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                4
+              </Button>
+              <Button variant="outline" className="text-blue-600 hover:text-blue-700">
+                Next
+              </Button>
+            </div>
           </div>
-          <p className="text-sm text-[#0066FF] cursor-pointer hover:underline">Next</p>
-        </div>
+        )}
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg overflow-hidden w-full max-w-2xl">
-            {/* Modal Header */}
-            <div className="bg-[#1e3a8a] px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold">
-                <span className="text-[#0066FF]">Med</span>
-                <span className="text-white">Care</span>
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-white text-2xl hover:opacity-80 transition"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <form onSubmit={handleAddAppointment} className="p-6">
-              <h3 className="text-2xl font-bold text-[#0A1F44] mb-6">Appointment</h3>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Doctor Name</label>
-                  <select
-                    value={formData.doctorName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, doctorName: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-                  >
-                    <option value="">Select a doctor</option>
-                    {/* API_ENDPOINT: GET /api/doctors */}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
-                  <select
-                    value={formData.patientName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, patientName: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-                  >
-                    <option value="">Select a patient</option>
-                    {/* API_ENDPOINT: GET /api/patients */}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
-                  <select
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-                  >
-                    <option value="">Select a time</option>
-                    {/* API_ENDPOINT: GET /api/available-times */}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
-                <textarea
-                  value={formData.reason}
-                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                  placeholder="Describe the reason for appointment..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-                  rows={4}
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-2 bg-[#0066FF] text-white rounded-lg font-medium hover:bg-[#0052CC] transition"
-                >
-                  Confirm
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* New Appointment Modal */}
+      <NewAppointmentModal 
+        isOpen={showNewAppointmentModal}
+        onClose={() => setShowNewAppointmentModal(false)}
+        onConfirm={handleNewAppointmentConfirm}
+      />
     </DashboardLayout>
   )
 }

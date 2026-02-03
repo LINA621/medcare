@@ -1,117 +1,74 @@
 "use client"
 
+import React from "react"
+import Link from "next/link"
 import { useState } from "react"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function AssistantConsultationsPage() {
-  const [consultations, setConsultations] = useState<any[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedFilter, setSelectedFilter] = useState("all")
-
-  // API_ENDPOINT: GET /api/assistant/consultations
-  // API_ENDPOINT: GET /api/assistant/consultation/:id/details
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterStatus, setFilterStatus] = useState("all")
 
   return (
     <DashboardLayout userRole="assistant" pageTitle="Consultations">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Search and Filter */}
-        <div className="flex items-center gap-4 justify-between">
-          <div className="flex-1 max-w-xs">
-            <Input
-              placeholder="Search consultations"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <div className="flex gap-4">
-            <select
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-            >
-              <option value="all">All Consultations</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="in-progress">In Progress</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Consultations List */}
-        <div className="space-y-4">
-          {consultations.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <p className="text-gray-500 mb-4">No consultations available</p>
-                <p className="text-sm text-gray-600">Consultations will appear here once scheduled</p>
-              </CardContent>
-            </Card>
-          ) : (
-            consultations.map((consultation, index) => (
-              <Card key={index}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-[#0A1F44] mb-2">{consultation.title}</h3>
-                      <div className="grid md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Doctor</p>
-                          <p className="text-sm font-medium text-gray-700">{consultation.doctor}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Patient</p>
-                          <p className="text-sm font-medium text-gray-700">{consultation.patient}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Date & Time</p>
-                          <p className="text-sm font-medium text-gray-700">{consultation.dateTime}</p>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">{consultation.notes}</p>
-                    </div>
-                    <div className="flex flex-col gap-2 ml-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        consultation.status === "completed"
-                          ? "bg-green-100 text-green-700"
-                          : consultation.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-blue-100 text-blue-700"
-                      }`}>
-                        {consultation.status || "Pending"}
-                      </span>
-                      <Button variant="outline" size="sm" className="bg-transparent">
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-
-        {/* Pagination */}
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">Previous</p>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map((page) => (
-              <button
-                key={page}
-                className={`w-10 h-10 rounded-lg font-medium transition ${
-                  page === 1
-                    ? "bg-[#0066FF] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-          <p className="text-sm text-[#0066FF] cursor-pointer hover:underline">Next</p>
+          <h1 className="text-2xl font-bold text-[#0A1F44]">Consultations</h1>
+          <Link href="/dashboard/assistant/consultations/new">
+            <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              New Consultation Report
+            </Button>
+          </Link>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="flex gap-4 items-center">
+          <Input
+            type="text"
+            placeholder="Search consultations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-md"
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
+          >
+            <option value="all">All Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+
+        {/* Consultations Table */}
+        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Patient Name</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Type</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Date</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Status</th>
+                <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* API_ENDPOINT: GET /api/assistant/consultations */}
+              {/* Response: Array of consultation objects with patient_name, type, date, status */}
+              <tr className="border-b border-gray-100 hover:bg-gray-50">
+                <td colSpan={5} className="py-12 px-6 text-center text-gray-500">
+                  No consultations yet. Create one to get started.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </DashboardLayout>
