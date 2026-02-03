@@ -192,7 +192,7 @@ export default function DashboardLayout({ children, userRole, pageTitle }: Dashb
       >
         {/* Logo section - at top of sidebar */}
         <div className="p-6 border-b border-[#0052CC] flex-shrink-0">
-          <Link href={`/dashboard/${userRole}`} className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <span className="text-2xl font-bold">
               <span className="text-[#0066FF]">Med</span>
               <span className="text-white">Care</span>

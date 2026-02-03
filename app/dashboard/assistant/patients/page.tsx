@@ -122,18 +122,10 @@ export default function AssistantPatients() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 bg-white">
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Patient Name <span className="text-gray-500 ml-1">↓</span>
-                    </th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Age <span className="text-gray-500 ml-1">↓</span>
-                    </th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Blood Group <span className="text-gray-500 ml-1">↓</span>
-                    </th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Chronic Diseases <span className="text-gray-500 ml-1">↓</span>
-                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Patient Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Age</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Blood Group</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Chronic Diseases</th>
                     <th className="text-center py-4 px-6 font-semibold text-gray-800 text-sm">User Action</th>
                   </tr>
                 </thead>
@@ -167,45 +159,24 @@ export default function AssistantPatients() {
                         <td className="py-4 px-6 text-gray-700">{patient.bloodGroup}</td>
                         <td className="py-4 px-6 text-gray-700">{patient.chronicDiseases}</td>
                         <td className="py-4 px-6 text-center">
-                          <div className="flex items-center justify-center gap-3">
-                            {/* Profile Icon */}
-                            <Link href={`/dashboard/assistant/patients/${patient.id}`}>
-                              <button className="p-2 hover:bg-gray-200 rounded-lg transition text-gray-700">
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                  />
-                                </svg>
-                              </button>
-                            </Link>
-
-                            {/* Consultation History Icon */}
-                            <Link href={`/dashboard/assistant/patients/${patient.id}/consultations`}>
-                              <button className="p-2 hover:bg-gray-200 rounded-lg transition text-gray-700">
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                  />
-                                </svg>
-                              </button>
-                            </Link>
-                          </div>
+                          {/* Profile Icon */}
+                          <Link href={`/dashboard/assistant/patients/${patient.id}`}>
+                            <button className="p-2 hover:bg-gray-200 rounded-lg transition text-gray-700 inline-flex items-center justify-center">
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                              </svg>
+                            </button>
+                          </Link>
                         </td>
                       </tr>
                     ))

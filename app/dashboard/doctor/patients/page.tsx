@@ -122,18 +122,10 @@ export default function DoctorPatients() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 bg-white">
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Patient Name <span className="text-gray-500 ml-1">↓</span>
-                    </th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Age <span className="text-gray-500 ml-1">↓</span>
-                    </th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Blood Group <span className="text-gray-500 ml-1">↓</span>
-                    </th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
-                      Chronic Diseases <span className="text-gray-500 ml-1">↓</span>
-                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Patient Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Age</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Blood Group</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Chronic Diseases</th>
                     <th className="text-center py-4 px-6 font-semibold text-gray-800 text-sm">User Action</th>
                   </tr>
                 </thead>
