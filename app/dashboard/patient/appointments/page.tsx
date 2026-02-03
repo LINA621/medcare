@@ -1,208 +1,290 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import DashboardLayout from "@/components/dashboard/DashboardLayout"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { apiService } from "@/lib/api"
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
-export default function MyAppointmentsPage() {
-  const [appointments, setAppointments] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<"all" | "upcoming" | "past">("all")
+interface Appointment {
+  id: number
+  patientName: string
+  doctorName: string
+  specialty: string
+  date: string
+  time: string
+  reason: string
+  status: 'planned' | 'reschedule' | 'completed'
+}
 
-  useEffect(() => {
-    // API_ENDPOINT: GET /api/appointments/my-appointments
-    // Response: [{ id, doctor, date, time, status, reason }]
-    const fetchAppointments = async () => {
-      const response = await apiService.getMyAppointments()
-      if (response.success && response.data) {
-        setAppointments(response.data as any[])
-      } else {
-        // Default appointments if API not connected
-        setAppointments([
-          {
-            id: 1,
-            doctor: "Dr. John Smith",
-            specialty: "Cardiologist",
-            date: "2025-01-20",
-            time: "10:00 AM",
-            status: "scheduled",
-            reason: "Regular checkup",
-          },
-          {
-            id: 2,
-            doctor: "Dr. Sarah Johnson",
-            specialty: "Orthopedic Surgeon",
-            date: "2025-01-15",
-            time: "02:00 PM",
-            status: "pending",
-            reason: "Knee pain consultation",
-          },
-          {
-            id: 3,
-            doctor: "Dr. Michael Lee",
-            specialty: "Pediatrician",
-            date: "2024-12-28",
-            time: "11:00 AM",
-            status: "completed",
-            reason: "Follow-up visit",
-          },
-        ])
-      }
-      setIsLoading(false)
-    }
+export default function PatientAppointments() {
+  const [appointments, setAppointments] = useState<Appointment[]>([
+    {
+      id: 1,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Check Up',
+      status: 'reschedule',
+    },
+    {
+      id: 2,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Follow up',
+      status: 'planned',
+    },
+    {
+      id: 3,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Follow up',
+      status: 'reschedule',
+    },
+    {
+      id: 4,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Check Up',
+      status: 'planned',
+    },
+    {
+      id: 5,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Check Up',
+      status: 'planned',
+    },
+    {
+      id: 6,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Check Up',
+      status: 'planned',
+    },
+    {
+      id: 7,
+      patientName: 'Douae Rateb Boulaich',
+      doctorName: 'Dr. Fatima Marouon',
+      specialty: 'Dr. Fatima Marouon',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      reason: 'Check Up',
+      status: 'reschedule',
+    },
+  ])
 
-    fetchAppointments()
-  }, [])
+  const [activeTab, setActiveTab] = useState<'new' | 'history'>('new')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "scheduled":
-        return "bg-green-100 text-green-700"
-      case "pending":
-        return "bg-yellow-100 text-yellow-700"
-      case "completed":
-        return "bg-gray-100 text-gray-700"
-      case "rejected":
-        return "bg-red-100 text-red-700"
-      default:
-        return "bg-gray-100 text-gray-700"
+  const getStatusBadge = (status: string) => {
+    if (status === 'planned') {
+      return (
+        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+          Planned
+        </span>
+      )
+    } else if (status === 'reschedule') {
+      return (
+        <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+          Reschedule
+        </span>
+      )
+    } else {
+      return (
+        <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+          Completed
+        </span>
+      )
     }
   }
 
-  const filteredAppointments = appointments.filter((apt) => {
-    if (filter === "all") return true
-    const aptDate = new Date(apt.date)
-    const today = new Date()
-    if (filter === "upcoming") return aptDate >= today
-    if (filter === "past") return aptDate < today
-    return true
-  })
+  const filteredAppointments = appointments
+    .filter((apt) => (activeTab === 'new' ? apt.status !== 'completed' : apt.status === 'completed'))
+    .filter((apt) => !searchTerm || apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((apt) => !dateFilter || apt.date === dateFilter)
 
   return (
-    <DashboardLayout userRole="patient">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#0A1F44] mb-2">My Appointments</h1>
-          <p className="text-gray-600">View and manage your appointments</p>
-        </div>
+    <DashboardLayout userRole="patient" pageTitle="Appointments">
+      <div className="space-y-6">
+        {/* Header */}
+        <h1 className="text-2xl font-bold text-[#0A1F44]">Appointments</h1>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === "all" ? "border-b-2 border-[#0066FF] text-[#0066FF]" : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter("upcoming")}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === "upcoming" ? "border-b-2 border-[#0066FF] text-[#0066FF]" : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Upcoming
-          </button>
-          <button
-            onClick={() => setFilter("past")}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === "past" ? "border-b-2 border-[#0066FF] text-[#0066FF]" : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Past
-          </button>
-        </div>
-
-        {/* Appointments List */}
-        {isLoading ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-gray-500">Loading appointments...</p>
-            </CardContent>
-          </Card>
-        ) : filteredAppointments.length > 0 ? (
-          <div className="space-y-4">
-            {filteredAppointments.map((appointment) => (
-              <Card key={appointment.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full bg-gray-200 flex-shrink-0" />
-                      <div>
-                        <h3 className="font-semibold text-lg text-[#0A1F44]">{appointment.doctor}</h3>
-                        <p className="text-sm text-gray-600 mb-1">{appointment.specialty}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(appointment.date).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}{" "}
-                          at {appointment.time}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col md:items-end gap-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(appointment.status)}`}
-                      >
-                        {appointment.status}
-                      </span>
-
-                      {appointment.status === "scheduled" && (
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            Reschedule
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 bg-transparent"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      )}
-
-                      {appointment.status === "completed" && (
-                        <Button variant="outline" size="sm">
-                          View Report
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Reason:</span> {appointment.reason}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex gap-8">
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`py-3 font-semibold text-sm transition ${
+                activeTab === 'new'
+                  ? 'text-[#0A1F44] border-b-2 border-[#0066FF]'
+                  : 'text-gray-600 border-b-2 border-transparent'
+              }`}
+            >
+              NEW APPOINTMENTS
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`py-3 font-semibold text-sm transition ${
+                activeTab === 'history'
+                  ? 'text-[#0A1F44] border-b-2 border-[#0066FF]'
+                  : 'text-gray-600 border-b-2 border-transparent'
+              }`}
+            >
+              APPOINTMENTS HISTORY
+            </button>
           </div>
-        ) : (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-[#0A1F44] mb-2">No appointments found</h3>
-              <p className="text-gray-600 mb-6">You don't have any {filter !== "all" && filter} appointments yet.</p>
-              <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC]">Book an Appointment</Button>
-            </CardContent>
-          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-xs"
+          />
+          <div className="flex gap-2 items-center">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDateFilter('')}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Button>
+          </div>
+        </div>
+
+        {/* Appointments Table */}
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-white">
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Date</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Time</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Doctor Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Specialty</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Reason</th>
+                    <th className="text-center py-4 px-6 font-semibold text-gray-800 text-sm">State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAppointments.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-12 text-gray-500">
+                        No appointments found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAppointments.map((appointment) => (
+                      <tr key={appointment.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td className="py-4 px-6 font-medium text-gray-900">{appointment.date}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.time}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.doctorName}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.specialty}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.reason}</td>
+                        <td className="py-4 px-6 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {getStatusBadge(appointment.status)}
+                            {appointment.status !== 'completed' && (
+                              <div className="flex gap-1">
+                                <button
+                                  className="p-1 hover:bg-gray-200 rounded text-gray-600"
+                                  title="Reschedule"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  className="p-1 hover:bg-red-100 rounded text-red-600"
+                                  title="Cancel"
+                                >
+                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                            {appointment.status === 'completed' && (
+                              <Link href={`/dashboard/patient/records/${appointment.id}`}>
+                                <button className="p-1 hover:bg-blue-100 rounded text-blue-600" title="View Report">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </button>
+                              </Link>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pagination */}
+        {filteredAppointments.length > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Showing results</span>
+            <div className="flex gap-2">
+              <Button variant="outline" disabled className="text-gray-400">
+                Previous
+              </Button>
+              <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] w-10 h-10 p-0">
+                1
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                2
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                3
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                4
+              </Button>
+              <Button variant="outline" className="text-blue-600 hover:text-blue-700">
+                Next
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </DashboardLayout>
