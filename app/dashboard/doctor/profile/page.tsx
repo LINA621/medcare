@@ -11,14 +11,14 @@ import { Input } from '@/components/ui/input'
 export default function DoctorProfile() {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    specialization: '',
-    licenseNumber: '',
-    yearsOfExperience: '',
-    clinic: '',
-    about: '',
+    fullName: 'Dr. Abderrahim Harouchi',
+    email: 'abderrahim.harouchi@medcare.com',
+    phone: '+212 612345678',
+    specialization: 'General Medicine',
+    licenseNumber: 'LIC-2024-001',
+    yearsOfExperience: '8',
+    clinic: 'MedCare Hospital',
+    about: 'Experienced general practitioner with 8 years of clinical practice. Dedicated to providing high-quality patient care and continuing medical education.',
   })
 
   // API_ENDPOINT: GET /api/doctor/profile
@@ -44,12 +44,11 @@ export default function DoctorProfile() {
   }
 
   return (
-    <DashboardLayout userRole="doctor">
+    <DashboardLayout userRole="doctor" pageTitle="Profile">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#0A1F44]">My Profile</h1>
-            <p className="text-gray-600 mt-2">Manage your professional information</p>
+            <h1 className="text-2xl font-bold text-[#0A1F44]">Profile</h1>
           </div>
           {!isEditing && (
             <Button onClick={() => setIsEditing(true)} className="bg-[#0066FF] text-white hover:bg-[#0052CC]">

@@ -158,10 +158,29 @@ export default function DashboardLayout({ children, userRole, pageTitle }: Dashb
     }
   }
 
+  const getRoleLabel = (role?: string): string => {
+    switch (role?.toLowerCase()) {
+      case "doctor":
+        return "Doctor"
+      case "patient":
+        return "Patient"
+      case "assistant":
+        return "Assistant"
+      case "admin":
+        return "Administrator"
+      case "pharmacist":
+        return "Pharmacist"
+      case "radiologist":
+        return "Radiologist"
+      default:
+        return "User"
+    }
+  }
+
   const userProfile = {
-    name: user?.name || "Admin User",
-    role: user?.role || "Administrator",
-    avatar: user?.avatar || "https://via.placeholder.com/40",
+    name: user?.name || "User",
+    role: getRoleLabel(user?.role),
+    avatar: user?.avatar || "/placeholder.svg",
   }
 
   return (
