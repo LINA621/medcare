@@ -17,14 +17,6 @@ export default function AssistantConsultationsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[#0A1F44]">Consultations</h1>
-          <Link href="/dashboard/assistant/consultations/new">
-            <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] flex items-center gap-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              New Consultation Report
-            </Button>
-          </Link>
         </div>
 
         {/* Search and Filter */}
