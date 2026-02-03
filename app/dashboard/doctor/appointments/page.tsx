@@ -32,6 +32,16 @@ export default function DoctorAppointments() {
   const [doctorFilter, setDoctorFilter] = useState('')
   const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false)
 
+  // New Appointments filters
+  const [newAptSearch, setNewAptSearch] = useState('')
+  const [newAptDate, setNewAptDate] = useState('')
+  const [newAptDoctor, setNewAptDoctor] = useState('')
+
+  // History Appointments filters
+  const [historyAptSearch, setHistoryAptSearch] = useState('')
+  const [historyAptDate, setHistoryAptDate] = useState('')
+  const [historyAptDoctor, setHistoryAptDoctor] = useState('')
+
   // Mock appointments data
   const [allAppointments] = useState<Appointment[]>([
     {
@@ -101,9 +111,18 @@ export default function DoctorAppointments() {
 
   const filteredAppointments = allAppointments
     .filter((apt) => apt.status === (activeTab === 'new' ? 'upcoming' : 'completed'))
-    .filter((apt) => !searchTerm || apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
-    .filter((apt) => !dateFilter || apt.date === dateFilter)
-    .filter((apt) => !doctorFilter || apt.doctorName === doctorFilter)
+    .filter((apt) => {
+      const currentSearch = activeTab === 'new' ? newAptSearch : historyAptSearch
+      return !currentSearch || apt.patientName.toLowerCase().includes(currentSearch.toLowerCase())
+    })
+    .filter((apt) => {
+      const currentDate = activeTab === 'new' ? newAptDate : historyAptDate
+      return !currentDate || apt.date === currentDate
+    })
+    .filter((apt) => {
+      const currentDoctor = activeTab === 'new' ? newAptDoctor : historyAptDoctor
+      return !currentDoctor || apt.doctorName === currentDoctor
+    })
 
   const handleCancelAppointment = (appointmentId: string) => {
     console.log('[v0] Cancel appointment:', appointmentId)
@@ -166,26 +185,36 @@ export default function DoctorAppointments() {
           <Input
             type="text"
             placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={activeTab === 'new' ? newAptSearch : historyAptSearch}
+            onChange={(e) => activeTab === 'new' ? setNewAptSearch(e.target.value) : setHistoryAptSearch(e.target.value)}
             className="max-w-sm"
           />
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <div className="relative">
               <svg className="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <input
                 type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
+                value={activeTab === 'new' ? newAptDate : historyAptDate}
+                onChange={(e) => activeTab === 'new' ? setNewAptDate(e.target.value) : setHistoryAptDate(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
                 placeholder="Filter by Date"
               />
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => activeTab === 'new' ? setNewAptDate('') : setHistoryAptDate('')}
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Button>
             <select
-              value={doctorFilter}
-              onChange={(e) => setDoctorFilter(e.target.value)}
+              value={activeTab === 'new' ? newAptDoctor : historyAptDoctor}
+              onChange={(e) => activeTab === 'new' ? setNewAptDoctor(e.target.value) : setHistoryAptDoctor(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
             >
               <option value="">Filter by Doctor Name</option>

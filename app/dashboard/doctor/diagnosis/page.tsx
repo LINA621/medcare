@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, Search, X, Loader2, Stethoscope } from "lucide-react"
+import { AlertCircle, Search, X, Loader2, Brain } from "lucide-react"
 
 // Comprehensive symptoms list from medical dataset
 const SYMPTOMS_LIST = [
@@ -197,7 +197,7 @@ export default function DiagnosticAIPage() {
           <Card className="border-0 shadow-sm">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b">
               <div className="flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-[#0066FF]" />
+                <Brain className="w-5 h-5 text-[#0066FF]" />
                 <div>
                   <CardTitle>Patient Symptom Assessment</CardTitle>
                   <p className="text-sm text-gray-600 font-normal mt-1">
@@ -328,7 +328,7 @@ export default function DiagnosticAIPage() {
                   </>
                 ) : (
                   <>
-                    <Stethoscope className="w-5 h-5 mr-2" />
+                    <Brain className="w-5 h-5 mr-2" />
                     Generate Differential Diagnosis
                   </>
                 )}
@@ -340,16 +340,7 @@ export default function DiagnosticAIPage() {
           <Card className="border-0 shadow-sm">
             <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 border-b">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 text-purple-600">
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                    <path
-                      fillRule="evenodd"
-                      d="M4 5a2 2 0 012-2 1 1 0 000 2h12a1 1 0 100-2 2 2 0 00-2 2v12a2 2 0 002 2 1 1 0 100-2H6a1 1 0 100 2 2 2 0 002-2V5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
+                <Brain className="w-5 h-5 text-purple-600" />
                 <div>
                   <CardTitle>Diagnostic Results</CardTitle>
                   <p className="text-sm text-gray-600 font-normal mt-1">
