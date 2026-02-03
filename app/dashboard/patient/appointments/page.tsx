@@ -93,8 +93,10 @@ export default function PatientAppointments() {
   ])
 
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [dateFilter, setDateFilter] = useState('')
+  const [newSearchTerm, setNewSearchTerm] = useState('')
+  const [newDateFilter, setNewDateFilter] = useState('')
+  const [historySearchTerm, setHistorySearchTerm] = useState('')
+  const [historyDateFilter, setHistoryDateFilter] = useState('')
 
   const getStatusBadge = (status: string) => {
     if (status === 'planned') {
@@ -118,10 +120,34 @@ export default function PatientAppointments() {
     }
   }
 
+  const handleCancelAppointment = (appointmentId: number) => {
+    console.log('[v0] Cancelling appointment:', appointmentId)
+    setAppointments(appointments.filter((apt) => apt.id !== appointmentId))
+    // API call to delete from database would go here
+  }
+
+  const handleRescheduleAppointment = (appointment: Appointment) => {
+    console.log('[v0] Rescheduling appointment:', appointment)
+    // Navigate to book appointment page with pre-filled data
+    // window.location.href = `/dashboard/patient/appointments/reschedule/${appointment.id}`
+  }
+
   const filteredAppointments = appointments
-    .filter((apt) => (activeTab === 'new' ? apt.status !== 'completed' : apt.status === 'completed'))
-    .filter((apt) => !searchTerm || apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
-    .filter((apt) => !dateFilter || apt.date === dateFilter)
+    .filter((apt) => {
+      if (activeTab === 'new') {
+        return apt.status !== 'completed'
+      } else {
+        return apt.status === 'completed'
+      }
+    })
+    .filter((apt) => {
+      const searchTerm = activeTab === 'new' ? newSearchTerm : historySearchTerm
+      return !searchTerm || apt.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+    })
+    .filter((apt) => {
+      const dateFilter = activeTab === 'new' ? newDateFilter : historyDateFilter
+      return !dateFilter || apt.date === dateFilter
+    })
 
   return (
     <DashboardLayout userRole="patient" pageTitle="Appointments">
@@ -160,8 +186,8 @@ export default function PatientAppointments() {
           <Input
             type="text"
             placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={activeTab === 'new' ? newSearchTerm : historySearchTerm}
+            onChange={(e) => activeTab === 'new' ? setNewSearchTerm(e.target.value) : setHistorySearchTerm(e.target.value)}
             className="max-w-xs"
           />
           <div className="flex gap-2 items-center">
@@ -170,14 +196,14 @@ export default function PatientAppointments() {
             </svg>
             <input
               type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
+              value={activeTab === 'new' ? newDateFilter : historyDateFilter}
+              onChange={(e) => activeTab === 'new' ? setNewDateFilter(e.target.value) : setHistoryDateFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
             />
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setDateFilter('')}
+              onClick={() => activeTab === 'new' ? setNewDateFilter('') : setHistoryDateFilter('')}
               className="text-gray-600 hover:text-gray-900"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +249,8 @@ export default function PatientAppointments() {
                             {appointment.status !== 'completed' && (
                               <div className="flex gap-1">
                                 <button
-                                  className="p-1 hover:bg-gray-200 rounded text-gray-600"
+                                  onClick={() => handleRescheduleAppointment(appointment)}
+                                  className="p-1 hover:bg-gray-200 rounded text-gray-600 transition"
                                   title="Reschedule"
                                 >
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +258,8 @@ export default function PatientAppointments() {
                                   </svg>
                                 </button>
                                 <button
-                                  className="p-1 hover:bg-red-100 rounded text-red-600"
+                                  onClick={() => handleCancelAppointment(appointment.id)}
+                                  className="p-1 hover:bg-red-100 rounded text-red-600 transition"
                                   title="Cancel"
                                 >
                                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -242,7 +270,7 @@ export default function PatientAppointments() {
                             )}
                             {appointment.status === 'completed' && (
                               <Link href={`/dashboard/patient/records/${appointment.id}`}>
-                                <button className="p-1 hover:bg-blue-100 rounded text-blue-600" title="View Report">
+                                <button className="p-1 hover:bg-blue-100 rounded text-blue-600 transition" title="View Report">
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>

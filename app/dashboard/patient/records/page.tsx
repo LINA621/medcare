@@ -82,14 +82,14 @@ export default function MedicalRecordsPage() {
             {/* Consultations */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Consultations</CardTitle>
+                <CardTitle>Consultations</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {records?.consultations?.map((consultation: any) => (
                     <div
                       key={consultation.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition"
                     >
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
@@ -98,26 +98,24 @@ export default function MedicalRecordsPage() {
                             {new Date(consultation.date).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-1">
+                        <p className="text-sm text-gray-600">
                           <span className="font-medium">Diagnosis:</span> {consultation.diagnosis}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Notes:</span> {consultation.notes}
-                        </p>
                       </div>
-                      <Button variant="outline" size="sm" className="ml-4 bg-transparent">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        Download
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="ml-4 bg-transparent hover:bg-blue-50 hover:text-[#0066FF] hover:border-[#0066FF]"
+                      >
+                        View More
                       </Button>
                     </div>
                   ))}
+                  {!records?.consultations || records.consultations.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No consultations available</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -32,6 +32,25 @@ const patientData = {
   phone: '+212 612345678',
 }
 
+// Generate available time slots (8 AM to 6 PM, 30-minute intervals)
+const generateTimeSlots = (): string[] => {
+  const slots: string[] = []
+  for (let hour = 8; hour < 18; hour++) {
+    slots.push(`${hour.toString().padStart(2, '0')}:00`)
+    if (hour < 17) {
+      slots.push(`${hour.toString().padStart(2, '0')}:30`)
+    }
+  }
+  return slots
+}
+
+// Mock booked appointments for this doctor (would come from database)
+const bookedSlots: { [key: string]: string[] } = {
+  '2026-02-05': ['09:00', '10:30', '14:00', '16:30'],
+  '2026-02-06': ['08:00', '11:00', '13:30', '17:30'],
+  '2026-02-07': ['09:30', '12:00', '15:00'],
+}
+
 export default function BookAppointmentPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -40,6 +59,7 @@ export default function BookAppointmentPage() {
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorInfo | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
+  const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [reason, setReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -49,6 +69,26 @@ export default function BookAppointmentPage() {
       setSelectedDoctor(doctorsList[doctorId])
     }
   }, [doctorId])
+
+  useEffect(() => {
+    if (selectedDate) {
+      console.log('[v0] Fetching available slots for date:', selectedDate)
+      
+      // Get all available time slots (8 AM to 6 PM, 30-min intervals)
+      const allSlots = generateTimeSlots()
+      
+      // Get booked slots for this date from database
+      const booked = bookedSlots[selectedDate] || []
+      
+      // Filter out booked slots to get available slots
+      const available = allSlots.filter((slot) => !booked.includes(slot))
+      
+      setAvailableSlots(available)
+      setSelectedTime('') // Reset selected time when date changes
+      
+      console.log('[v0] Available slots for', selectedDate, ':', available)
+    }
+  }, [selectedDate])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -181,17 +221,37 @@ export default function BookAppointmentPage() {
 
                   {/* Time */}
                   <div className="mb-4">
-                    <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                      Time *
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Available Time Slots *
                     </label>
-                    <Input
-                      id="time"
-                      type="time"
-                      value={selectedTime}
-                      onChange={(e) => setSelectedTime(e.target.value)}
-                      required
-                      className="focus:ring-[#0066FF] focus:border-[#0066FF]"
-                    />
+                    {selectedDate ? (
+                      availableSlots.length > 0 ? (
+                        <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                          {availableSlots.map((slot) => (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setSelectedTime(slot)}
+                              className={`p-3 rounded-lg font-medium text-sm transition-all border-2 ${
+                                selectedTime === slot
+                                  ? 'border-[#0066FF] bg-blue-50 text-[#0066FF]'
+                                  : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
+                              }`}
+                            >
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+                          No available slots for this date. Please select another date.
+                        </div>
+                      )
+                    ) : (
+                      <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
+                        Please select a date first
+                      </div>
+                    )}
                   </div>
 
                   {/* Reason */}
