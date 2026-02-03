@@ -6,39 +6,113 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+interface Appointment {
+  id: string
+  date: string
+  time: string
+  patientName: string
+  doctorName: string
+  reason: string
+  status: 'upcoming' | 'completed'
+}
+
 export default function DoctorAppointments() {
-  const [activeTab, setActiveTab] = useState('upcoming')
+  const [activeTab, setActiveTab] = useState('new')
   const [searchTerm, setSearchTerm] = useState('')
-  const [appointments, setAppointments] = useState<any[]>([])
-  const [showModal, setShowModal] = useState(false)
+  const [dateFilter, setDateFilter] = useState('')
+  const [doctorFilter, setDoctorFilter] = useState('')
 
-  // API_ENDPOINT: GET /api/doctor/appointments
-  // Response: Array of appointment objects with: id, patientName, date, time, reason, status
-  
-  // API_ENDPOINT: PUT /api/doctor/appointments/:id
-  // Request: { status: 'completed' | 'cancelled' | 'rescheduled' }
-  // Response: Updated appointment
+  // Mock appointments data
+  const [allAppointments] = useState<Appointment[]>([
+    {
+      id: '1',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Fatima Zahra Raiss',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '2',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Fouad Raissouni',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Follow up',
+      status: 'upcoming',
+    },
+    {
+      id: '3',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Krishtav Rajan',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Follow up',
+      status: 'upcoming',
+    },
+    {
+      id: '4',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Sumanth Tinson',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '5',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'EG Subramani',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '6',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Ranjan Maari',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+    {
+      id: '7',
+      date: '05/12/2025',
+      time: '9:30 AM',
+      patientName: 'Philliplie Gopal',
+      doctorName: 'Dr. Fatima Marouon',
+      reason: 'Check Up',
+      status: 'upcoming',
+    },
+  ])
 
-  const handleCompleteAppointment = (appointmentId: string) => {
-    // API call to mark appointment as completed
-    console.log('[v0] Complete appointment:', appointmentId)
-  }
+  const filteredAppointments = allAppointments
+    .filter((apt) => apt.status === (activeTab === 'new' ? 'upcoming' : 'completed'))
+    .filter((apt) => !searchTerm || apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((apt) => !dateFilter || apt.date === dateFilter)
+    .filter((apt) => !doctorFilter || apt.doctorName === doctorFilter)
 
   const handleCancelAppointment = (appointmentId: string) => {
-    // API call to cancel appointment
     console.log('[v0] Cancel appointment:', appointmentId)
+    // API call to cancel appointment would go here
   }
 
   return (
-    <DashboardLayout userRole="doctor">
+    <DashboardLayout userRole="doctor" pageTitle="Appointments">
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#0A1F44]">Appointments</h1>
-            <p className="text-gray-600 mt-2">Manage your patient appointments</p>
+            <h1 className="text-2xl font-bold text-[#0A1F44]">Appointments</h1>
           </div>
-          <Button onClick={() => setShowModal(true)} className="bg-[#0066FF] text-white hover:bg-[#0052CC]">
-            + New Appointment
+          <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] flex items-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            New Appointment
           </Button>
         </div>
 
@@ -46,101 +120,105 @@ export default function DoctorAppointments() {
         <div className="border-b border-gray-200">
           <div className="flex gap-8">
             <button
-              onClick={() => setActiveTab('upcoming')}
-              className={`py-4 font-semibold text-sm transition ${
-                activeTab === 'upcoming'
-                  ? 'text-[#0066FF] border-b-2 border-[#0066FF]'
+              onClick={() => setActiveTab('new')}
+              className={`py-3 font-semibold text-sm transition ${
+                activeTab === 'new'
+                  ? 'text-[#0A1F44] border-b-2 border-[#0A1F44]'
                   : 'text-gray-600 border-b-2 border-transparent'
               }`}
             >
-              UPCOMING APPOINTMENTS
+              NEW APPOINTMENTS
             </button>
             <button
-              onClick={() => setActiveTab('completed')}
-              className={`py-4 font-semibold text-sm transition ${
-                activeTab === 'completed'
-                  ? 'text-[#0066FF] border-b-2 border-[#0066FF]'
+              onClick={() => setActiveTab('history')}
+              className={`py-3 font-semibold text-sm transition ${
+                activeTab === 'history'
+                  ? 'text-[#0A1F44] border-b-2 border-[#0A1F44]'
                   : 'text-gray-600 border-b-2 border-transparent'
               }`}
             >
-              COMPLETED APPOINTMENTS
+              APPOINTMENTS HISTORY
             </button>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="flex gap-4">
+        {/* Filters */}
+        <div className="flex gap-4 items-center flex-wrap">
           <Input
             type="text"
-            placeholder="Search appointments..."
+            placeholder="Search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md"
+            className="max-w-sm"
           />
-          <input type="date" className="px-4 py-2 border border-gray-300 rounded-lg" />
+          <div className="flex gap-2">
+            <div className="relative">
+              <svg className="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
+                placeholder="Filter by Date"
+              />
+            </div>
+            <select
+              value={doctorFilter}
+              onChange={(e) => setDoctorFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-sm"
+            >
+              <option value="">Filter by Doctor Name</option>
+              <option value="Dr. Fatima Marouon">Dr. Fatima Marouon</option>
+            </select>
+          </div>
         </div>
 
         {/* Appointments Table */}
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Date</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Time</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Patient Name</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Reason</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Status</th>
-                    <th className="text-center py-4 px-6 font-semibold text-gray-700 text-sm">Actions</th>
+                  <tr className="border-b border-gray-200 bg-white">
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Date</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Time</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Patient Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Doctor Name</th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">Reason</th>
+                    <th className="text-center py-4 px-6 font-semibold text-gray-800 text-sm">User Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {appointments.length === 0 ? (
+                  {filteredAppointments.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-12 text-gray-500">
-                        No appointments found. Data will appear here when connected to API.
+                        No appointments found.
                       </td>
                     </tr>
                   ) : (
-                    appointments.map((appointment) => (
+                    filteredAppointments.map((appointment) => (
                       <tr key={appointment.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                         <td className="py-4 px-6 font-medium text-gray-900">{appointment.date}</td>
-                        <td className="py-4 px-6 text-gray-600">{appointment.time}</td>
-                        <td className="py-4 px-6 text-gray-600">{appointment.patientName}</td>
-                        <td className="py-4 px-6 text-gray-600">{appointment.reason}</td>
-                        <td className="py-4 px-6">
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              appointment.status === 'completed'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-blue-100 text-blue-700'
-                            }`}
-                          >
-                            {appointment.status}
-                          </span>
-                        </td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.time}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.patientName}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.doctorName}</td>
+                        <td className="py-4 px-6 text-gray-700">{appointment.reason}</td>
                         <td className="py-4 px-6 text-center">
-                          <div className="flex gap-2 justify-center">
-                            {activeTab === 'upcoming' && (
-                              <>
-                                <Button
-                                  onClick={() => handleCompleteAppointment(appointment.id)}
-                                  className="bg-green-500 text-white hover:bg-green-600"
-                                  size="sm"
-                                >
-                                  Complete
-                                </Button>
-                                <Button
-                                  onClick={() => handleCancelAppointment(appointment.id)}
-                                  className="bg-red-500 text-white hover:bg-red-600"
-                                  size="sm"
-                                >
-                                  Cancel
-                                </Button>
-                              </>
-                            )}
-                          </div>
+                          <button
+                            onClick={() => handleCancelAppointment(appointment.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition inline-flex items-center justify-center"
+                            title="Cancel appointment"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -151,77 +229,30 @@ export default function DoctorAppointments() {
           </CardContent>
         </Card>
 
-        {/* New Appointment Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-2xl mx-auto">
-              <div className="bg-[#0A1F44] text-white p-6 flex items-center justify-between rounded-t-lg">
-                <h2 className="text-xl font-bold">
-                  <span className="text-[#0066FF]">Med</span>
-                  Care
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-white hover:text-gray-300 text-2xl"
-                >
-                  ✕
-                </button>
-              </div>
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-[#0A1F44] mb-6">New Appointment</h3>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    setShowModal(false)
-                  }}
-                  className="space-y-6"
-                >
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Patient Name</label>
-                      <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]">
-                        <option>Select a patient</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Date</label>
-                      <input type="date" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Time</label>
-                      <input type="time" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Duration</label>
-                      <input type="text" placeholder="30 mins" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Reason</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Reason for appointment..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-                    />
-                  </div>
-                  <div className="flex gap-4">
-                    <Button
-                      type="button"
-                      onClick={() => setShowModal(false)}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="flex-1 bg-[#0066FF] text-white hover:bg-[#0052CC]">
-                      Create Appointment
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+        {/* Pagination */}
+        {filteredAppointments.length > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Showing results</span>
+            <div className="flex gap-2">
+              <Button variant="outline" disabled className="text-gray-400">
+                Previous
+              </Button>
+              <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] w-10 h-10 p-0">
+                1
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                2
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                3
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                4
+              </Button>
+              <Button variant="outline" className="text-blue-600 hover:text-blue-700">
+                Next
+              </Button>
+            </div>
           </div>
         )}
       </div>

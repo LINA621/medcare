@@ -1,105 +1,211 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+interface Patient {
+  id: string
+  name: string
+  age: number
+  bloodGroup: string
+  chronicDiseases: string
+  avatar: string
+}
+
 export default function DoctorPatients() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [patients, setPatients] = useState<any[]>([])
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([])
 
-  // API_ENDPOINT: GET /api/doctor/patients
-  // Response: Array of patient objects with: id, name, email, phone, age, gender, lastVisit, status
-  
-  // API_ENDPOINT: GET /api/doctor/patient/:id
-  // Response: Detailed patient information
+  // Mock patient data - patients with appointments to this doctor
+  const [patients] = useState<Patient[]>([
+    {
+      id: '1',
+      name: 'Fatima Zahra Rahmouni',
+      age: 45,
+      bloodGroup: 'B+ve',
+      chronicDiseases: 'Diabetes - High blood pressure',
+      avatar: '/placeholder-user.jpg',
+    },
+    {
+      id: '2',
+      name: 'Fouad Raissouni',
+      age: 62,
+      bloodGroup: 'B+ve',
+      chronicDiseases: 'High Cholesterol',
+      avatar: '/placeholder-user.jpg',
+    },
+    {
+      id: '3',
+      name: 'Krishtav Rajan',
+      age: 33,
+      bloodGroup: 'B+ve',
+      chronicDiseases: 'Heart disease',
+      avatar: '/placeholder-user.jpg',
+    },
+    {
+      id: '4',
+      name: 'Sumanth Tinson',
+      age: 26,
+      bloodGroup: 'AB+ve',
+      chronicDiseases: 'Diabetes',
+      avatar: '/placeholder-user.jpg',
+    },
+    {
+      id: '5',
+      name: 'EG Subramani',
+      age: 42,
+      bloodGroup: 'AB-ve',
+      chronicDiseases: 'Cancer - Heart disease',
+      avatar: '/placeholder-user.jpg',
+    },
+    {
+      id: '6',
+      name: 'Ranjan Maari',
+      age: 23,
+      bloodGroup: 'AB-ve',
+      chronicDiseases: 'High blood pressure',
+      avatar: '/placeholder-user.jpg',
+    },
+    {
+      id: '7',
+      name: 'Philliplie Gopal',
+      age: 14,
+      bloodGroup: 'AB+ve',
+      chronicDiseases: 'High Cholesterol - High blood pressure',
+      avatar: '/placeholder-user.jpg',
+    },
+  ])
 
-  const handleViewDetails = (patientId: string) => {
-    // Navigate to patient details
-    console.log('[v0] View patient details:', patientId)
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
+    if (value.trim() === '') {
+      setFilteredPatients([])
+    } else {
+      const filtered = patients.filter((patient) =>
+        patient.name.toLowerCase().includes(value.toLowerCase())
+      )
+      setFilteredPatients(filtered)
+    }
   }
 
+  const displayedPatients = searchTerm ? filteredPatients : patients
+
   return (
-    <DashboardLayout userRole="doctor">
+    <DashboardLayout userRole="doctor" pageTitle="Patients">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-[#0A1F44]">Patients</h1>
-          <p className="text-gray-600 mt-2">Manage and view your patient list</p>
+        {/* Patient Info Tabs */}
+        <div className="border-b border-gray-200">
+          <button className="py-3 px-0 font-semibold text-[#0066FF] border-b-2 border-[#0066FF] text-sm">
+            Patient Info
+          </button>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex gap-4 items-center">
-          <div className="flex-1">
-            <Input
-              type="text"
-              placeholder="Search patients by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-          >
-            <option value="all">All Patients</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+        {/* Search */}
+        <div className="flex gap-4">
+          <Input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="w-full max-w-xs"
+          />
         </div>
 
         {/* Patients Table */}
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Patient Name</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Email</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Age</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Last Visit</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Status</th>
-                    <th className="text-center py-4 px-6 font-semibold text-gray-700 text-sm">Actions</th>
+                  <tr className="border-b border-gray-200 bg-white">
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
+                      Patient Name <span className="text-gray-500 ml-1">↓</span>
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
+                      Age <span className="text-gray-500 ml-1">↓</span>
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
+                      Blood Group <span className="text-gray-500 ml-1">↓</span>
+                    </th>
+                    <th className="text-left py-4 px-6 font-semibold text-gray-800 text-sm">
+                      Chronic Diseases <span className="text-gray-500 ml-1">↓</span>
+                    </th>
+                    <th className="text-center py-4 px-6 font-semibold text-gray-800 text-sm">User Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {patients.length === 0 ? (
+                  {displayedPatients.length === 0 && searchTerm ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-12 text-gray-500">
-                        No patients found. Patient data will appear here when connected to API.
+                      <td colSpan={5} className="text-center py-12 text-gray-500">
+                        No patients found matching your search.
+                      </td>
+                    </tr>
+                  ) : displayedPatients.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-12 text-gray-500">
+                        No patients found.
                       </td>
                     </tr>
                   ) : (
-                    patients.map((patient) => (
+                    displayedPatients.map((patient) => (
                       <tr key={patient.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                        <td className="py-4 px-6 font-medium text-gray-900">{patient.name}</td>
-                        <td className="py-4 px-6 text-gray-600">{patient.email}</td>
-                        <td className="py-4 px-6 text-gray-600">{patient.age} years</td>
-                        <td className="py-4 px-6 text-gray-600">{patient.lastVisit}</td>
                         <td className="py-4 px-6">
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              patient.status === 'active'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-700'
-                            }`}
-                          >
-                            {patient.status}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={patient.avatar}
+                              alt={patient.name}
+                              className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                            />
+                            <span className="font-medium text-[#0A1F44]">{patient.name}</span>
+                          </div>
                         </td>
+                        <td className="py-4 px-6 text-gray-700">{patient.age}</td>
+                        <td className="py-4 px-6 text-gray-700">{patient.bloodGroup}</td>
+                        <td className="py-4 px-6 text-gray-700">{patient.chronicDiseases}</td>
                         <td className="py-4 px-6 text-center">
-                          <Button
-                            onClick={() => handleViewDetails(patient.id)}
-                            className="bg-[#0066FF] text-white hover:bg-[#0052CC]"
-                            size="sm"
-                          >
-                            View Details
-                          </Button>
+                          <div className="flex items-center justify-center gap-3">
+                            {/* Profile Icon */}
+                            <Link href={`/dashboard/doctor/patients/${patient.id}`}>
+                              <button className="p-2 hover:bg-gray-200 rounded-lg transition text-gray-700">
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
+                                </svg>
+                              </button>
+                            </Link>
+
+                            {/* Consultation History Icon */}
+                            <Link href={`/dashboard/doctor/patients/${patient.id}/consultations`}>
+                              <button className="p-2 hover:bg-gray-200 rounded-lg transition text-gray-700">
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                              </button>
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -111,17 +217,28 @@ export default function DoctorPatients() {
         </Card>
 
         {/* Pagination */}
-        {patients.length > 0 && (
+        {displayedPatients.length > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Showing 1 to 10 of {patients.length} patients</span>
+            <span className="text-sm text-gray-600">Showing 1 to {displayedPatients.length} of {patients.length} patients</span>
             <div className="flex gap-2">
-              <Button variant="outline" disabled>
+              <Button variant="outline" disabled className="text-gray-400">
                 Previous
               </Button>
-              <Button className="bg-[#0066FF] text-white">1</Button>
-              <Button variant="outline">2</Button>
-              <Button variant="outline">3</Button>
-              <Button variant="outline">Next</Button>
+              <Button className="bg-[#0066FF] text-white hover:bg-[#0052CC] w-10 h-10 p-0">
+                1
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                2
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                3
+              </Button>
+              <Button variant="outline" className="w-10 h-10 p-0">
+                4
+              </Button>
+              <Button variant="outline" className="text-blue-600 hover:text-blue-700">
+                Next
+              </Button>
             </div>
           </div>
         )}
