@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { apiService } from '@/lib/api'
 
 interface Appointment {
   id: number
@@ -19,84 +20,50 @@ interface Appointment {
 }
 
 export default function PatientAppointments() {
-  const [appointments, setAppointments] = useState<Appointment[]>([
-    {
-      id: 1,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Check Up',
-      status: 'reschedule',
-    },
-    {
-      id: 2,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Follow up',
-      status: 'planned',
-    },
-    {
-      id: 3,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Follow up',
-      status: 'reschedule',
-    },
-    {
-      id: 4,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Check Up',
-      status: 'planned',
-    },
-    {
-      id: 5,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Check Up',
-      status: 'planned',
-    },
-    {
-      id: 6,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Check Up',
-      status: 'planned',
-    },
-    {
-      id: 7,
-      patientName: 'Douae Rateb Boulaich',
-      doctorName: 'Dr. Fatima Marouon',
-      specialty: 'Dr. Fatima Marouon',
-      date: '05/12/2025',
-      time: '9:30 AM',
-      reason: 'Check Up',
-      status: 'reschedule',
-    },
-  ])
-
+  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new')
   const [newSearchTerm, setNewSearchTerm] = useState('')
   const [newDateFilter, setNewDateFilter] = useState('')
   const [historySearchTerm, setHistorySearchTerm] = useState('')
   const [historyDateFilter, setHistoryDateFilter] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch appointments on component mount
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        setIsLoading(true)
+        const response = await apiService.getMyAppointments()
+
+        if (response.success && response.data) {
+          // Transform API data to match our interface
+          const transformedData = Array.isArray(response.data)
+            ? response.data.map((apt: any) => ({
+                id: apt.id,
+                patientName: apt.patient?.name || 'N/A',
+                doctorName: apt.doctor?.name || 'N/A',
+                specialty: apt.doctor?.specialty || 'N/A',
+                date: apt.date || '',
+                time: apt.time || '',
+                reason: apt.reason || '',
+                status: apt.status?.toLowerCase() || 'planned',
+              }))
+            : []
+
+          setAppointments(transformedData)
+          console.log('[v0] Appointments fetched:', transformedData)
+        } else {
+          console.error('[v0] Failed to fetch appointments:', response.error?.message)
+        }
+      } catch (error) {
+        console.error('[v0] Error fetching appointments:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchAppointments()
+  }, [])
 
   const getStatusBadge = (status: string) => {
     if (status === 'planned') {
@@ -120,10 +87,20 @@ export default function PatientAppointments() {
     }
   }
 
-  const handleCancelAppointment = (appointmentId: number) => {
-    console.log('[v0] Cancelling appointment:', appointmentId)
-    setAppointments(appointments.filter((apt) => apt.id !== appointmentId))
-    // API call to delete from database would go here
+  const handleCancelAppointment = async (appointmentId: number) => {
+    try {
+      console.log('[v0] Cancelling appointment:', appointmentId)
+      const response = await apiService.cancelAppointment(String(appointmentId))
+
+      if (response.success) {
+        setAppointments(appointments.filter((apt) => apt.id !== appointmentId))
+        console.log('[v0] Appointment cancelled successfully')
+      } else {
+        console.error('[v0] Failed to cancel appointment:', response.error?.message)
+      }
+    } catch (error) {
+      console.error('[v0] Error cancelling appointment:', error)
+    }
   }
 
   const handleRescheduleAppointment = (appointment: Appointment) => {
@@ -216,6 +193,11 @@ export default function PatientAppointments() {
         {/* Appointments Table */}
         <Card className="border-0 shadow-sm">
           <CardContent className="p-0">
+            {isLoading ? (
+              <div className="text-center py-12 text-gray-500">
+                <p>Loading appointments...</p>
+              </div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -285,6 +267,7 @@ export default function PatientAppointments() {
                 </tbody>
               </table>
             </div>
+            )}
           </CardContent>
         </Card>
 

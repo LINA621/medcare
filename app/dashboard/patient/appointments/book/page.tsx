@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { apiService } from '@/lib/api'
 
 interface DoctorInfo {
   id: number
@@ -14,22 +15,12 @@ interface DoctorInfo {
   specialty: string
 }
 
-const doctorsList: { [key: string]: DoctorInfo } = {
-  '1': { id: 1, name: 'Dr. John Smith', specialty: 'Cardiologist' },
-  '2': { id: 2, name: 'Dr. Sarah Johnson', specialty: 'Orthopedic Surgeon' },
-  '3': { id: 3, name: 'Dr. Michael Lee', specialty: 'Pediatrician' },
-  '4': { id: 4, name: 'Dr. Emily Davis', specialty: 'Gynecologist' },
-  '5': { id: 5, name: 'Dr. Fatima Marouon', specialty: 'General Practitioner' },
-  '6': { id: 6, name: 'Dr. Ahmed Hassan', specialty: 'Dermatologist' },
-}
-
-// Mock patient data (pre-filled from patient profile)
-const patientData = {
-  name: 'Douae Rateb Boulaich',
-  number: 'P-2024-001',
-  bloodType: 'O+',
-  email: 'douae@example.com',
-  phone: '+212 612345678',
+interface PatientData {
+  name: string
+  number: string
+  bloodType: string
+  email: string
+  phone: string
 }
 
 // Generate available time slots (8 AM to 6 PM, 30-minute intervals)
@@ -44,72 +35,160 @@ const generateTimeSlots = (): string[] => {
   return slots
 }
 
-// Mock booked appointments for this doctor (would come from database)
-const bookedSlots: { [key: string]: string[] } = {
-  '2026-02-05': ['09:00', '10:30', '14:00', '16:30'],
-  '2026-02-06': ['08:00', '11:00', '13:30', '17:30'],
-  '2026-02-07': ['09:30', '12:00', '15:00'],
-}
-
 export default function BookAppointmentPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const doctorId = searchParams.get('doctorId')
 
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorInfo | null>(null)
+  const [patientData, setPatientData] = useState<PatientData | null>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [reason, setReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [isLoadingDoctor, setIsLoadingDoctor] = useState(true)
 
+  // Fetch doctor information
   useEffect(() => {
-    if (doctorId && doctorsList[doctorId]) {
-      setSelectedDoctor(doctorsList[doctorId])
+    const fetchDoctorData = async () => {
+      if (!doctorId) {
+        setIsLoadingDoctor(false)
+        return
+      }
+
+      try {
+        setIsLoadingDoctor(true)
+        const response = await apiService.getDoctor(doctorId)
+        
+        if (response.success && response.data) {
+          setSelectedDoctor({
+            id: response.data.id,
+            name: response.data.name || `Dr. ${response.data.firstName} ${response.data.lastName}`,
+            specialty: response.data.specialty || 'Medical Professional',
+          })
+          console.log('[v0] Doctor fetched:', response.data)
+        } else {
+          console.error('[v0] Failed to fetch doctor:', response.error?.message)
+        }
+      } catch (error) {
+        console.error('[v0] Error fetching doctor:', error)
+      } finally {
+        setIsLoadingDoctor(false)
+      }
     }
+
+    fetchDoctorData()
   }, [doctorId])
 
+  // Fetch patient data on mount
   useEffect(() => {
-    if (selectedDate) {
-      console.log('[v0] Fetching available slots for date:', selectedDate)
-      
-      // Get all available time slots (8 AM to 6 PM, 30-min intervals)
-      const allSlots = generateTimeSlots()
-      
-      // Get booked slots for this date from database
-      const booked = bookedSlots[selectedDate] || []
-      
-      // Filter out booked slots to get available slots
-      const available = allSlots.filter((slot) => !booked.includes(slot))
-      
-      setAvailableSlots(available)
-      setSelectedTime('') // Reset selected time when date changes
-      
-      console.log('[v0] Available slots for', selectedDate, ':', available)
+    const fetchPatientData = async () => {
+      try {
+        const patientId = localStorage.getItem('patient_id') || '1'
+        const response = await apiService.getPatient(patientId)
+        
+        if (response.success && response.data) {
+          setPatientData({
+            name: response.data.name || response.data.firstName + ' ' + response.data.lastName,
+            number: response.data.patientNumber || `P-2024-${response.data.id}`,
+            bloodType: response.data.bloodType || 'N/A',
+            email: response.data.email || 'N/A',
+            phone: response.data.phone || 'N/A',
+          })
+          console.log('[v0] Patient data fetched:', response.data)
+        } else {
+          console.error('[v0] Failed to fetch patient data:', response.error?.message)
+        }
+      } catch (error) {
+        console.error('[v0] Error fetching patient data:', error)
+      }
     }
-  }, [selectedDate])
 
-  const handleSubmit = (e: React.FormEvent) => {
+    fetchPatientData()
+  }, [])
+
+  // Fetch available slots for selected date
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      if (!selectedDate || !doctorId) return
+
+      try {
+        console.log('[v0] Fetching available slots for doctor:', doctorId, 'date:', selectedDate)
+        
+        const response = await apiService.getAvailableSlots(doctorId, selectedDate)
+        
+        if (response.success && response.data) {
+          // API might return available_times or slots
+          const slots = response.data.available_times || response.data.slots || []
+          setAvailableSlots(slots)
+          console.log('[v0] Available slots fetched:', slots)
+        } else {
+          // Fallback: generate slots and assume none are booked
+          const allSlots = generateTimeSlots()
+          setAvailableSlots(allSlots)
+          console.log('[v0] Using fallback slots:', allSlots)
+        }
+        
+        setSelectedTime('') // Reset selected time when date changes
+      } catch (error) {
+        console.error('[v0] Error fetching available slots:', error)
+        // Fallback to all slots
+        setAvailableSlots(generateTimeSlots())
+      }
+    }
+
+    fetchAvailableSlots()
+  }, [selectedDate, doctorId])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    console.log('[v0] Booking appointment:', {
-      doctor: selectedDoctor,
-      date: selectedDate,
-      time: selectedTime,
-      reason: reason,
-      patientInfo: patientData,
-    })
+    try {
+      const appointmentData = {
+        doctor_id: selectedDoctor?.id,
+        date: selectedDate,
+        time: selectedTime,
+        reason: reason,
+        patient_id: localStorage.getItem('patient_id') || '1',
+      }
 
-    // Simulate API call
-    setTimeout(() => {
+      console.log('[v0] Booking appointment:', appointmentData)
+
+      const response = await apiService.bookAppointment(appointmentData)
+
+      if (response.success) {
+        console.log('[v0] Appointment booked successfully:', response.data)
+        setSuccess(true)
+        setTimeout(() => {
+          router.push('/dashboard/patient/appointments')
+        }, 2000)
+      } else {
+        console.error('[v0] Failed to book appointment:', response.error?.message)
+        alert('Failed to book appointment: ' + (response.error?.message || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('[v0] Error booking appointment:', error)
+      alert('Error booking appointment. Please try again.')
+    } finally {
       setIsSubmitting(false)
-      setSuccess(true)
-      setTimeout(() => {
-        router.push('/dashboard/patient/appointments')
-      }, 2000)
-    }, 1000)
+    }
+  }
+
+  if (isLoadingDoctor) {
+    return (
+      <DashboardLayout userRole="patient" pageTitle="Book Appointment">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-gray-600">Loading doctor information...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   if (!selectedDoctor) {
@@ -182,19 +261,19 @@ export default function BookAppointmentPage() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Patient Name</label>
-                      <Input type="text" value={patientData.name} disabled className="bg-gray-100" />
+                      <Input type="text" value={patientData?.name || 'Loading...'} disabled className="bg-gray-100" />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Patient Number</label>
-                      <Input type="text" value={patientData.number} disabled className="bg-gray-100" />
+                      <Input type="text" value={patientData?.number || 'N/A'} disabled className="bg-gray-100" />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Blood Type</label>
-                      <Input type="text" value={patientData.bloodType} disabled className="bg-gray-100" />
+                      <Input type="text" value={patientData?.bloodType || 'N/A'} disabled className="bg-gray-100" />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Email</label>
-                      <Input type="email" value={patientData.email} disabled className="bg-gray-100" />
+                      <Input type="email" value={patientData?.email || 'N/A'} disabled className="bg-gray-100" />
                     </div>
                   </div>
                 </div>
